@@ -22,11 +22,10 @@ def get_some_keystrokes():
 
 
 def create_fingerprint():
-    username= input("What's your name? ")
+    username= raw_input("Enter your name? ")
     data= get_some_keystrokes()
     data.save_to_file( data_dir+username )
-    fingerprint= create_fingerprint_from_capture_data( username, data )
-    fingerprint.save_to_file( DATA_DIR+username )
+    #Need to train model when a new entry is made
     print ("Finished creating fingerprint!")
 
 
