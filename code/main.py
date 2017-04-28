@@ -1,42 +1,59 @@
+import capture_keys
 import json
-from core import KeystrokeCaptureData
+from keystrokes import Signature, KeystrokeCaptureData
+
 
 conf = json.load(open("config.json"))
-
-data_dir=conf['data_dir']
+DATA_DIR=conf['data_dir']
 text_to_type=conf['text_to_type']
 
-
-def get_some_keystrokes():
-    print ("Please write the following text. When you're finished, press Ctrl-C")
-    print ("------------------")
-    print (text_to_type)
+#Returns the keystroke data after KeyboardInterrupt is pressed
+def get_keystrokes():
+    print "Enter the following text and press Ctrl-C\n"
+    print text_to_type.lower()
     data= KeystrokeCaptureData()
     try:
-        import capture_keys
         capture_keys.start(data.on_key)
     except KeyboardInterrupt:
         pass
-    print ("\n")
+    print "KeyStrokes recived\n"
     return data
 
+#searches for all the signatures in the given data_dir, can be configured using the json file
+def get_all_signatures():
+    import os
+    files= [DATA_DIR+f for f in os.listdir(DATA_DIR) if f.endswith(Signature.FILE_TYPE)]
+    signatures= map( Signature.load_file, files)
+    if len(signatures)==0:
+        raise Exception("No signatures available for matching")
+    return zip(signatures, files)
 
-def create_fingerprint():
+def predict_user():
+    data= get_keystrokes()
+    data_signature= Signature.create( data )
+    for signature,filename in get_all_signatures():
+        similarity= data_signature.similarity( signature )
+        print "similarity with {}: {}".format( filename, similarity )
+
+
+def create_signature():
     username= raw_input("Enter your name? ")
-    data= get_some_keystrokes()
-    data.save_to_file( data_dir+username )
-    #Need to train model when a new entry is made
-    print ("Finished creating fingerprint!")
+    data= get_keystrokes()
+    data.save_file( DATA_DIR+username )
+    signature= Signature.create( data )
+    signature.save_file( DATA_DIR+username )
+    print "Finished creating signature!"
+
 
 
 if __name__=='__main__':
-    print ("Select a option:\n  1) Create Fingerprint\n  2) Predict User \n  3) Check for authenticity")
+    print ("Select a option:\n  1) Create Signature\n  2) Predict User \n  3) Check for authenticity")
 
     try:
         option= int(input())
         print ("\n\n")
         if option==1:
-            create_fingerprint()
+            create_signature()
         elif option==2:
             predict_user()
         elif option==3:

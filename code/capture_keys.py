@@ -1,6 +1,5 @@
 #!/usr/bin/python
-#import sys
-#import os
+
 from Xlib import X, XK, display
 from Xlib.ext import record
 from Xlib.protocol import rq
@@ -10,7 +9,7 @@ record_dpy = display.Display()
 myrecordcallback=''
 
 if not record_dpy.has_extension("RECORD"):
-    print("RECORD extension not found")
+    print "RECORD extension not found"
     sys.exit(1)
 ctx = record_dpy.record_create_context(
             0,
@@ -44,7 +43,7 @@ def record_callback(reply):
     if reply.category != record.FromServer:
         return
     if reply.client_swapped:
-        print ("* received swapped protocol data, cowardly ignored")
+        print "* received swapped protocol data, cowardly ignored"
         return
     if not len(reply.data) or ord(reply.data[0]) < 2:
         return
