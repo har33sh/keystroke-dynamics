@@ -1,0 +1,67 @@
+import capture_keys
+import json
+from keystroke_dynamics import Signature, KeystrokeCaptureData
+
+
+conf = json.load(open("config.json"))
+DATA_DIR=conf['data_dir']
+text_to_type=conf['text_to_type']
+
+#Returns the keystroke data after KeyboardInterrupt is pressed
+def get_keystrokes():
+    print "Enter the following text and press Ctrl-C\n"
+    print text_to_type.lower()
+    data= KeystrokeCaptureData()
+    try:
+        capture_keys.start(data.on_key)
+    except KeyboardInterrupt:
+        pass
+    print "KeyStrokes recived\n"
+    return data
+
+#searches for all the signatures in the given data_dir, datadir can be configured using the json file
+def get_all_signatures():
+    import os
+    files= [DATA_DIR+f for f in os.listdir(DATA_DIR) if f.endswith(Signature.FILE_TYPE)]
+    signatures= map( Signature.load_file, files)
+    if len(signatures)==0:
+        raise Exception("No signatures available for matching")
+    return zip(signatures, files)
+
+#can be used to predict the user based on the typing pattern
+def predict_user():
+    data= get_keystrokes()
+    data_signature= Signature.create( data )
+    for signature,filename in get_all_signatures():
+        similarity= data_signature.similarity( signature )
+        print "similarity with {}: {}".format( filename, similarity )
+
+#creates signature which is later used  in the prediction model for prediction
+def create_signature():
+    username= raw_input("Enter your name? ")
+    data= get_keystrokes()
+    data.save_file( DATA_DIR+username )
+    signature= Signature.create( data )
+    signature.save_file( DATA_DIR+username )
+    print "Finished creating signature!"
+
+
+
+if __name__=='__main__':
+    print ("Select a option:\n  1) Create Signature\n  2) Predict User \n  3) Check for authenticity")
+
+    try:
+        option= int(input())
+        print ("\n\n")
+        if option==1:
+            create_signature()
+        elif option==2:
+            predict_user()
+        elif option==3:
+            check_auth()
+        else:
+            raise Exception("Invalid Option Choosen")
+
+    except Exception as error:
+        print ("Error " +str(error))
+        exit()

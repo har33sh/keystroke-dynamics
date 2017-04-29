@@ -1,0 +1,19 @@
+First run python2.7 try1.py
+
+->Enter any name w/o backspace. 
+->Press Enter
+->Enter any name w/o backspace
+->Press Enter
+-> Press Enter
+-> Ctrl-C
+
+
+The try1.py script runs your pattern and learns and dumps it in xx file.
+
+python2.7 test.py
+
+-> enter the same name
+
+-> wii give you a correlation matrix.
+
+TODO: using different ways to correlation and testing.
